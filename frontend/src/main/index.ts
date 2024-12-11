@@ -18,6 +18,9 @@ function createWindow(): void {
     },
   });
 
+  // Handle from renderer
+  ipcMain.handle("ping", () => "pong");
+
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
   });
