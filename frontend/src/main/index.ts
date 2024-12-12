@@ -19,7 +19,15 @@ function createWindow(): void {
   });
 
   // Handle from renderer
-  ipcMain.handle("ping", () => "pong");
+  ipcMain.handle("ping", (e, args) => {
+    console.log("ping", args, e);
+    ipcMain.emit("reply", ["Hello from renderer"]);
+    ipcMain.emit("say", ["Say from renderer"]);
+    return "pong";
+  });
+  ipcMain.addListener("say", (args) => console.log(`Hello!!! ${args}`));
+  ipcMain.handle("doAThing", (_e, [arg0]) => `Test ${arg0}`);
+  ipcMain.on("reply", (args) => console.log("reply", args));
 
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();

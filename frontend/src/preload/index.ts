@@ -3,7 +3,9 @@ import { electronAPI } from "@electron-toolkit/preload";
 
 // Custom APIs for renderer
 const api = {
-  ping: (): Promise<void> => ipcRenderer.invoke("ping"),
+  ping: (): Promise<void> => {
+    return ipcRenderer.invoke("ping");
+  },
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to
