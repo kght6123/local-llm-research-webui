@@ -7,11 +7,13 @@ import "./App.css";
 function App(): JSX.Element {
   const [message, setMessage] = useState<string>("");
   useEffect(() => {
+    // カスタムAPIを実行する
     window.api.ping().then((r) => setMessage(r));
-    // Send a message to the main process with no response
+
+    // メインプロセスに応答なしでメッセージを送信
     window.electron.ipcRenderer.send("electron:say", "hello");
 
-    // Send a message to the main process with the response asynchronously
+    // メインプロセスに非同期でメッセージを送信
     window.electron.ipcRenderer.invoke("doAThing", ["aaa"]).then((re) => {
       console.log(re);
     });
