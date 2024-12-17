@@ -6,6 +6,11 @@ const api = {
   ping: (): Promise<void> => {
     return ipcRenderer.invoke("ping");
   },
+  textGeneration: (text: string): Promise<string> => {
+    return ipcRenderer.invoke("doTextGeneration", text);
+  },
+  run: (text: string): Promise<string> =>
+    ipcRenderer.invoke("transformers:run", text),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

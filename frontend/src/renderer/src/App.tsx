@@ -9,6 +9,10 @@ function App(): JSX.Element {
   useEffect(() => {
     // カスタムAPIを実行する
     window.api.ping().then((r) => setMessage(r));
+    // window.api
+    //   .run("自己紹介をしてください。")
+    //   // .textGeneration("自己紹介をしてください。")
+    //   .then((r) => setMessage(r));
 
     // メインプロセスに応答なしでメッセージを送信
     window.electron.ipcRenderer.send("electron:say", "hello");
@@ -35,6 +39,13 @@ function App(): JSX.Element {
     <>
       <img alt="logo" className="logo" src={electronLogo} />
       {message && <h1>{message}</h1>}
+      <button
+        onClick={() =>
+          window.api.run("自己紹介をしてください。").then((r) => setMessage(r))
+        }
+      >
+        送信
+      </button>
       <Versions></Versions>
     </>
   );
