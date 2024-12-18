@@ -6,6 +6,7 @@ import "./App.css";
 
 function App(): JSX.Element {
   const [message, setMessage] = useState<string>("");
+  const [counter, setCounter] = useState<number>(0);
   useEffect(() => {
     // カスタムAPIを実行する
     window.api.ping().then((r) => setMessage(r));
@@ -13,6 +14,13 @@ function App(): JSX.Element {
     //   .run("自己紹介をしてください。")
     //   // .textGeneration("自己紹介をしてください。")
     //   .then((r) => setMessage(r));
+
+    window.api.onUpdateCounter((value) => {
+      setCounter((oldValue: number): number => {
+        return oldValue + value;
+      });
+      window.api.counterValue(counter + value);
+    });
 
     // メインプロセスに応答なしでメッセージを送信
     window.electron.ipcRenderer.send("electron:say", "hello");
@@ -27,11 +35,10 @@ function App(): JSX.Element {
       alert(args);
       console.log(args);
     };
-    window.electron.ipcRenderer.on("reply", reply);
+    const removeListener = window.electron.ipcRenderer.on("reply", reply);
 
     return (): void => {
       // Remove a listener
-      const removeListener = window.electron.ipcRenderer.on("reply", reply);
       removeListener();
     };
   }, []);
@@ -46,6 +53,7 @@ function App(): JSX.Element {
       >
         送信
       </button>
+      Current value: <strong>{counter}</strong>
       <Versions></Versions>
     </>
   );

@@ -7,6 +7,8 @@ declare global {
       ping: () => Promise<string>;
       textGeneration: (text: string) => Promise<string>;
       run: (text: string) => Promise<string>;
+      onUpdateCounter: (callback: (value: number) => void) => void;
+      counterValue: (value: number) => void;
     };
   }
 }

@@ -11,6 +11,12 @@ const api = {
   },
   run: (text: string): Promise<string> =>
     ipcRenderer.invoke("transformers:run", text),
+  onUpdateCounter: (callback: (value: number) => void): Electron.IpcRenderer =>
+    ipcRenderer.on("update-counter", (_event, value: number) =>
+      callback(value),
+    ),
+  counterValue: (value: number): void =>
+    ipcRenderer.send("counter-value", value),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, ipcMain } from "electron";
+import { app, shell, BrowserWindow, Menu, ipcMain } from "electron";
 import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { pipeline, TextGenerationSingle, env } from "@huggingface/transformers";
@@ -18,6 +18,23 @@ function createWindow(): void {
       nodeIntegrationInWorker: true,
     },
   });
+
+  const menu = Menu.buildFromTemplate([
+    {
+      label: app.name,
+      submenu: [
+        {
+          click: (): void => mainWindow.webContents.send("update-counter", 1),
+          label: "Increment",
+        },
+        {
+          click: (): void => mainWindow.webContents.send("update-counter", -1),
+          label: "Decrement",
+        },
+      ],
+    },
+  ]);
+  Menu.setApplicationMenu(menu);
 
   // Handle from renderer
   ipcMain.handle("ping", (e, args) => {
@@ -73,6 +90,10 @@ function createWindow(): void {
     return "Hello from main";
   });
   ipcMain.on("reply", (args) => console.log("reply", args));
+
+  ipcMain.on("counter-value", (_event, value) => {
+    console.log(value); // 値が Node のコンソールへ出力されます
+  });
 
   mainWindow.on("ready-to-show", () => {
     mainWindow.show();
