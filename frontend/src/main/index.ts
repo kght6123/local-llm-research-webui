@@ -47,47 +47,44 @@ function createWindow(): void {
   ipcMain.handle("doAThing", (_e, [arg0]) => `Test ${arg0}`);
   ipcMain.handle("doTextGeneration", async (_e, [text]: string[]) => {
     // Create a text-generation pipeline
-    const generator = await pipeline(
-      "text-generation",
-      "onnx-community/Llama-3.2-1B-Instruct",
-      {
-        // progress_callback: ({
-        //   name,
-        //   status,
-        //   loaded,
-        //   total,
-        //   progress,
-        //   file,
-        // }) => {
-        //   console.log(
-        //     `${name || ""}(${file || ""}):${status} ${loaded || 0}/${total || 0} ${progress || 0}% `,
-        //   );
-        // },
+    pipeline("text-generation", "onnx-community/Llama-3.2-1B-Instruct", {
+      progress_callback: ({ name, status, loaded, total, progress, file }) => {
+        console.log(
+          `${name || ""}(${file || ""}):${status} ${loaded || 0}/${total || 0} ${progress || 0}% `,
+        );
       },
-    );
-    console.log("generator", generator);
+    })
+      .then((generator) => {
+        console.log("generator", generator);
 
-    // Define the list of messages
-    const messages = [
-      {
-        role: "system",
-        content:
-          "日本漫画の月曜日のたわわに出てくる委員長になりきって、返事をしてください。",
-      },
-      { role: "user", content: text },
-    ];
-
-    // Generate a response
-    const output: TextGenerationSingle[] | TextGenerationSingle[][] =
-      await generator(messages, { max_new_tokens: 128 });
-
-    console.log(JSON.stringify(output));
-    if (isTextGenerationSingleArray(output)) {
-      return output[0].generated_text;
-    } else {
-      return output[0][0].generated_text;
-    }
-    return "Hello from main";
+        // Define the list of messages
+        const messages = [
+          {
+            role: "system",
+            content:
+              "日本漫画の月曜日のたわわに出てくる委員長になりきって、返事をしてください。",
+          },
+          { role: "user", content: text },
+        ];
+        // Generate a response
+        return generator(messages, { max_new_tokens: 128 });
+      })
+      .then((output: TextGenerationSingle[] | TextGenerationSingle[][]) => {
+        // Generate a response
+        console.log(JSON.stringify(output));
+        if (isTextGenerationSingleArray(output)) {
+          mainWindow.webContents.send(
+            "update-message",
+            output[0].generated_text,
+          );
+        } else {
+          mainWindow.webContents.send(
+            "update-message",
+            output[0][0].generated_text,
+          );
+        }
+      });
+    return "Processing...";
   });
   ipcMain.on("reply", (args) => console.log("reply", args));
 

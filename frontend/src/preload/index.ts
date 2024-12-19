@@ -15,6 +15,10 @@ const api = {
     ipcRenderer.on("update-counter", (_event, value: number) =>
       callback(value),
     ),
+  onUpdateMessage: (callback: (value: string) => void): Electron.IpcRenderer =>
+    ipcRenderer.on("update-message", (_event, value: string) =>
+      callback(value),
+    ),
   counterValue: (value: number): void =>
     ipcRenderer.send("counter-value", value),
 };

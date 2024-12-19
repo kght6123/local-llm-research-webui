@@ -22,6 +22,11 @@ function App(): JSX.Element {
       window.api.counterValue(counter + value);
     });
 
+    window.api.onUpdateMessage((value) => {
+      console.log("value", value);
+      setMessage(value);
+    });
+
     // メインプロセスに応答なしでメッセージを送信
     window.electron.ipcRenderer.send("electron:say", "hello");
 
@@ -48,10 +53,19 @@ function App(): JSX.Element {
       {message && <h1>{message}</h1>}
       <button
         onClick={() =>
+          window.api
+            .textGeneration("自己紹介をしてください。")
+            .then((r) => setMessage(r))
+        }
+      >
+        Text Generation
+      </button>
+      <button
+        onClick={() =>
           window.api.run("自己紹介をしてください。").then((r) => setMessage(r))
         }
       >
-        送信
+        Text Classification
       </button>
       Current value: <strong>{counter}</strong>
       <Versions></Versions>
