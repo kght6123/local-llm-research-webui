@@ -167,7 +167,7 @@ function runExe(exePath: string): Promise<void> {
   });
 }
 
-(async function main(): Promise<void> {
+export default async function main(): Promise<void> {
   try {
     // 1. 最新リリース情報から Windows 用 EXE のダウンロードURLを取得
     console.log("最新の Windows 用 EXE を取得しています...");
@@ -187,4 +187,4 @@ function runExe(exePath: string): Promise<void> {
   } catch (err) {
     console.error("エラーが発生しました:", err);
   }
-})();
+}

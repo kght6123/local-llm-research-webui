@@ -67,6 +67,9 @@ function App(): JSX.Element {
       >
         Text Classification
       </button>
+      <button onClick={() => window.api.install().then((r) => setMessage(r))}>
+        Install Ollama
+      </button>
       Current value: <strong>{counter}</strong>
       <Versions></Versions>
     </>

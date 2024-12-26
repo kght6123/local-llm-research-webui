@@ -1,9 +1,11 @@
 import { app, shell, BrowserWindow, Menu, ipcMain } from "electron";
 import path, { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
-import { pipeline, TextGenerationSingle, env } from "@huggingface/transformers";
+import { pipeline, TextGenerationSingle } from "@huggingface/transformers";
 import icon from "../../resources/icon.png?asset";
 import { spawn } from "child_process";
+import installWindows from "./install/install-windows";
+import installDarwin from "./install/install-darwin";
 
 async function createWindow(): Promise<void> {
   // start external process.
@@ -207,6 +209,16 @@ app.whenReady().then(() => {
       },
     );
     return JSON.stringify(await generator(text), null, 2);
+  });
+
+  ipcMain.handle("ollama:install", async () => {
+    console.log(
+      process.platform === "win32" ? "Running on Windows" : "Running on macOS",
+      process.platform,
+    );
+    if (process.platform === "win32") await installWindows();
+    else await installDarwin();
+    return "インストールが起動しました。画面の指示に従ってください。";
   });
 
   createWindow();

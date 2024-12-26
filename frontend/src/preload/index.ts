@@ -11,6 +11,7 @@ const api = {
   },
   run: (text: string): Promise<string> =>
     ipcRenderer.invoke("transformers:run", text),
+  install: (): Promise<string> => ipcRenderer.invoke("ollama:install"),
   onUpdateCounter: (callback: (value: number) => void): Electron.IpcRenderer =>
     ipcRenderer.on("update-counter", (_event, value: number) =>
       callback(value),

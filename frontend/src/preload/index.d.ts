@@ -10,6 +10,7 @@ declare global {
       onUpdateCounter: (callback: (value: number) => void) => void;
       onUpdateMessage: (callback: (value: string) => void) => void;
       counterValue: (value: number) => void;
+      install: () => Promise<string>;
     };
   }
 }

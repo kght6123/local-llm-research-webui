@@ -144,7 +144,7 @@ function openFile(filePath: string): Promise<void> {
   });
 }
 
-(async function main(): Promise<void> {
+export default async function main(): Promise<void> {
   try {
     // 1. GitHub API から最新リリースの 'Ollama-darwin.zip' ダウンロードURLを取得
     console.log("最新の darwin 用 ZIP を取得しています...");
@@ -171,6 +171,7 @@ function openFile(filePath: string): Promise<void> {
       }
     }
     console.log(`.app が展開されたのを確認しました: ${appPath}`);
+    await new Promise((r) => setTimeout(r, 1000));
 
     // 4. Ollama.app を起動
     await openFile(appPath);
@@ -178,4 +179,4 @@ function openFile(filePath: string): Promise<void> {
   } catch (err) {
     console.error("エラーが発生しました:", err);
   }
-})();
+}
