@@ -1,10 +1,37 @@
 import { app, shell, BrowserWindow, Menu, ipcMain } from "electron";
-import { join } from "path";
+import path, { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { pipeline, TextGenerationSingle, env } from "@huggingface/transformers";
 import icon from "../../resources/icon.png?asset";
+import { spawn } from "child_process";
 
-function createWindow(): void {
+async function createWindow(): Promise<void> {
+  // start external process.
+  const sum = await new Promise((resolve, reject) => {
+    // <1>
+    const command = path.join(__dirname, "../../dist/main");
+    const args = ["1", "2"];
+    const add = spawn(command, args); // <2>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const chunks: any[] = [];
+
+    add.stderr.pipe(process.stderr); // <3>
+    add.stdout.on("data", (chunk) => chunks.push(chunk)); // <4>
+
+    add.once("exit", (code) => {
+      // <5>
+      if (code !== 0) {
+        // reject(new Error("code !== 0"));
+        resolve(Buffer.concat(chunks).toString());
+      } else {
+        resolve(Buffer.concat(chunks).toString());
+      }
+    });
+    add.once("error", (err) => reject(err)); // <6>
+  });
+
+  console.info(JSON.stringify({ sum }));
+
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -44,7 +71,34 @@ function createWindow(): void {
     return "pong";
   });
   ipcMain.addListener("say", (args) => console.log(`Hello!!! ${args}`));
-  ipcMain.handle("doAThing", (_e, [arg0]) => `Test ${arg0}`);
+  // ipcMain.handle("doAThing", (_e, [arg0]) => `Test ${arg0}`);
+  ipcMain.handle("doAThing", async (_e, [arg0]) => {
+    // start external process.
+    const sum = await new Promise((resolve, reject) => {
+      // <1>
+      const command = path.join(__dirname, "../../dist/main");
+      const args = [arg0];
+      const add = spawn(command, args); // <2>
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const chunks: any[] = [];
+
+      add.stderr.pipe(process.stderr); // <3>
+      add.stdout.on("data", (chunk) => chunks.push(chunk)); // <4>
+
+      add.once("exit", (code) => {
+        // <5>
+        if (code !== 0) {
+          // reject(new Error("code !== 0"));
+          resolve(Buffer.concat(chunks).toString());
+        } else {
+          resolve(Buffer.concat(chunks).toString());
+        }
+      });
+      add.once("error", (err) => reject(err)); // <6>
+    });
+    console.info(JSON.stringify({ sum }));
+    return JSON.stringify({ sum });
+  });
   ipcMain.handle("doTextGeneration", async (_e, [text]: string[]) => {
     // Create a text-generation pipeline
     pipeline("text-generation", "onnx-community/Llama-3.2-1B-Instruct", {
