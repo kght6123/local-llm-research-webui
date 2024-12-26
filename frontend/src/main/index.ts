@@ -1,4 +1,4 @@
-import { app, shell, BrowserWindow, Menu, ipcMain } from "electron";
+import { app, shell, BrowserWindow, Menu, ipcMain, session } from "electron";
 import path, { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { pipeline, TextGenerationSingle } from "@huggingface/transformers";
@@ -6,6 +6,7 @@ import icon from "../../resources/icon.png?asset";
 import { spawn } from "child_process";
 import installWindows from "./install/install-windows";
 import installDarwin from "./install/install-darwin";
+import ollama, { Ollama } from "ollama";
 
 async function createWindow(): Promise<void> {
   // start external process.
@@ -219,6 +220,31 @@ app.whenReady().then(() => {
     if (process.platform === "win32") await installWindows();
     else await installDarwin();
     return "インストールが起動しました。画面の指示に従ってください。";
+  });
+
+  ipcMain.handle("ollama:chat", async (_event, text: string) => {
+    console.log("ollama:chat", text, ollama, ollama.chat, new Ollama());
+    const response = await ollama.chat({
+      model: "llama3.2:1b",
+      messages: [{ role: "user", content: text }],
+    });
+    console.log(response.message.content);
+    return response.message.content;
+  });
+
+  session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
+    const responseHeaders = { ...details.responseHeaders };
+    delete responseHeaders["Content-Security-Policy"];
+    console.log("responseHeaders", responseHeaders);
+    callback({
+      responseHeaders,
+      // responseHeaders: {
+      //   ...details.responseHeaders,
+      //   // "Content-Security-Policy": [
+      //   //   "default-src 'self' 'unsafe-inline' 'localhost:5173' '127.0.0.1:11434'",
+      //   // ],
+      // },
+    });
   });
 
   createWindow();

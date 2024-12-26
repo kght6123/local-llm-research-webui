@@ -11,6 +11,7 @@ declare global {
       onUpdateMessage: (callback: (value: string) => void) => void;
       counterValue: (value: number) => void;
       install: () => Promise<string>;
+      chat: (text: string) => Promise<string>;
     };
   }
 }

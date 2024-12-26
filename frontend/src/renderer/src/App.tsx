@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Versions from "./components/Versions";
 import electronLogo from "./assets/electron.svg";
+import ollama from "ollama/browser";
 
 import "./App.css";
 
@@ -42,6 +43,13 @@ function App(): JSX.Element {
     };
     const removeListener = window.electron.ipcRenderer.on("reply", reply);
 
+    ollama
+      .chat({
+        model: "llama3.2:1b",
+        messages: [{ role: "user", content: "Why is the sky blue?" }],
+      })
+      .then((response) => setMessage(response.message.content));
+
     return (): void => {
       // Remove a listener
       removeListener();
@@ -69,6 +77,13 @@ function App(): JSX.Element {
       </button>
       <button onClick={() => window.api.install().then((r) => setMessage(r))}>
         Install Ollama
+      </button>
+      <button
+        onClick={() =>
+          window.api.chat("空はなぜ青いのですか？").then((r) => setMessage(r))
+        }
+      >
+        Ollama Chat
       </button>
       Current value: <strong>{counter}</strong>
       <Versions></Versions>
