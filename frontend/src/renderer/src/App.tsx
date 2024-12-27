@@ -43,13 +43,6 @@ function App(): JSX.Element {
     };
     const removeListener = window.electron.ipcRenderer.on("reply", reply);
 
-    ollama
-      .chat({
-        model: "llama3.2:1b",
-        messages: [{ role: "user", content: "Why is the sky blue?" }],
-      })
-      .then((response) => setMessage(response.message.content));
-
     return (): void => {
       // Remove a listener
       removeListener();
@@ -80,7 +73,25 @@ function App(): JSX.Element {
       </button>
       <button
         onClick={() =>
-          window.api.chat("空はなぜ青いのですか？").then((r) => setMessage(r))
+          // window.api.chat("空はなぜ青いのですか？").then((r) => setMessage(r))
+          ollama
+            .pull({
+              model: "llama3.2:1b",
+            })
+            .then((response) => setMessage(response.digest))
+        }
+      >
+        Ollama Pull
+      </button>
+      <button
+        onClick={() =>
+          // window.api.chat("空はなぜ青いのですか？").then((r) => setMessage(r))
+          ollama
+            .chat({
+              model: "llama3.2:1b",
+              messages: [{ role: "user", content: "Why is the sky blue?" }],
+            })
+            .then((response) => setMessage(response.message.content))
         }
       >
         Ollama Chat

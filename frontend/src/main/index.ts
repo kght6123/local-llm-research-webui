@@ -9,31 +9,6 @@ import installDarwin from "./install/install-darwin";
 import ollama, { Ollama } from "ollama";
 
 async function createWindow(): Promise<void> {
-  // start external process.
-  const sum = await new Promise((resolve, reject) => {
-    // <1>
-    const command = path.join(__dirname, "../../dist/main");
-    const args = ["1", "2"];
-    const add = spawn(command, args); // <2>
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const chunks: any[] = [];
-
-    add.stderr.pipe(process.stderr); // <3>
-    add.stdout.on("data", (chunk) => chunks.push(chunk)); // <4>
-
-    add.once("exit", (code) => {
-      // <5>
-      if (code !== 0) {
-        // reject(new Error("code !== 0"));
-        resolve(Buffer.concat(chunks).toString());
-      } else {
-        resolve(Buffer.concat(chunks).toString());
-      }
-    });
-    add.once("error", (err) => reject(err)); // <6>
-  });
-
-  console.info(JSON.stringify({ sum }));
 
   // Create the browser window.
   const mainWindow = new BrowserWindow({
@@ -76,31 +51,7 @@ async function createWindow(): Promise<void> {
   ipcMain.addListener("say", (args) => console.log(`Hello!!! ${args}`));
   // ipcMain.handle("doAThing", (_e, [arg0]) => `Test ${arg0}`);
   ipcMain.handle("doAThing", async (_e, [arg0]) => {
-    // start external process.
-    const sum = await new Promise((resolve, reject) => {
-      // <1>
-      const command = path.join(__dirname, "../../dist/main");
-      const args = [arg0];
-      const add = spawn(command, args); // <2>
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      const chunks: any[] = [];
-
-      add.stderr.pipe(process.stderr); // <3>
-      add.stdout.on("data", (chunk) => chunks.push(chunk)); // <4>
-
-      add.once("exit", (code) => {
-        // <5>
-        if (code !== 0) {
-          // reject(new Error("code !== 0"));
-          resolve(Buffer.concat(chunks).toString());
-        } else {
-          resolve(Buffer.concat(chunks).toString());
-        }
-      });
-      add.once("error", (err) => reject(err)); // <6>
-    });
-    console.info(JSON.stringify({ sum }));
-    return JSON.stringify({ sum });
+    return "";
   });
   ipcMain.handle("doTextGeneration", async (_e, [text]: string[]) => {
     // Create a text-generation pipeline
@@ -235,7 +186,7 @@ app.whenReady().then(() => {
   session.defaultSession.webRequest.onHeadersReceived((details, callback) => {
     const responseHeaders = { ...details.responseHeaders };
     delete responseHeaders["Content-Security-Policy"];
-    console.log("responseHeaders", responseHeaders);
+    // console.log("responseHeaders", responseHeaders);
     callback({
       responseHeaders,
       // responseHeaders: {
