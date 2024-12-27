@@ -1,4 +1,4 @@
-appId: com.electron.app
+appId: jp.kght6123.app
 productName: local-llm-research-webui
 directories:
   buildResources: build
