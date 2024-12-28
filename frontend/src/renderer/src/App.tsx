@@ -77,22 +77,36 @@ function App(): JSX.Element {
           ollama
             .pull({
               model: "llama3.2:1b",
+              stream: true,
             })
-            .then((response) => setMessage(response.digest))
+            .then(async (stream) => {
+              for await (const chunk of stream) {
+                setMessage(
+                  `${chunk.digest}/${chunk.total} ${chunk.status} completed=${chunk.completed}`,
+                );
+              }
+            })
         }
       >
         Ollama Pull
       </button>
       <button
-        onClick={() =>
-          // window.api.chat("空はなぜ青いのですか？").then((r) => setMessage(r))
+        onClick={() => {
+          setMessage("");
           ollama
             .chat({
               model: "llama3.2:1b",
               messages: [{ role: "user", content: "Why is the sky blue?" }],
+              stream: true,
             })
-            .then((response) => setMessage(response.message.content))
-        }
+            .then(async (stream) => {
+              for await (const chunk of stream) {
+                setMessage((message) => {
+                  return (message += chunk.message.content);
+                });
+              }
+            });
+        }}
       >
         Ollama Chat
       </button>

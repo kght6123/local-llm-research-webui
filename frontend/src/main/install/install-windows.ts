@@ -124,7 +124,15 @@ function downloadFile(url: string, dest: string): Promise<void> {
 
         // ダウンロード開始
         res.pipe(file);
-
+        const size = parseInt(res.headers["content-length"] || "0", 10);
+        let currentLength = 0;
+        console.log(`ダウンロードサイズ: ${size} bytes`);
+        res.on("data", (chunk) => {
+          currentLength += chunk.length;
+          console.log(
+            `ダウンロード中: ${(currentLength / size) * 100}% ${chunk.length} bytes`,
+          );
+        });
         file.on("finish", () => {
           file.close(() => {
             console.log(`ダウンロード完了: ${dest}`);

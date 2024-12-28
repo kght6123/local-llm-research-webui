@@ -1,15 +1,13 @@
 import { app, shell, BrowserWindow, Menu, ipcMain, session } from "electron";
-import path, { join } from "path";
+import { join } from "path";
 import { electronApp, optimizer, is } from "@electron-toolkit/utils";
 import { pipeline, TextGenerationSingle } from "@huggingface/transformers";
 import icon from "../../resources/icon.png?asset";
-import { spawn } from "child_process";
 import installWindows from "./install/install-windows";
 import installDarwin from "./install/install-darwin";
 import ollama, { Ollama } from "ollama";
 
 async function createWindow(): Promise<void> {
-
   // Create the browser window.
   const mainWindow = new BrowserWindow({
     width: 900,
@@ -49,10 +47,10 @@ async function createWindow(): Promise<void> {
     return "pong";
   });
   ipcMain.addListener("say", (args) => console.log(`Hello!!! ${args}`));
-  // ipcMain.handle("doAThing", (_e, [arg0]) => `Test ${arg0}`);
-  ipcMain.handle("doAThing", async (_e, [arg0]) => {
-    return "";
-  });
+  ipcMain.handle("doAThing", (_e, [arg0]) => `Test ${arg0}`);
+  // ipcMain.handle("doAThing", async (_e, [arg0]) => {
+  //   return "";
+  // });
   ipcMain.handle("doTextGeneration", async (_e, [text]: string[]) => {
     // Create a text-generation pipeline
     pipeline("text-generation", "onnx-community/Llama-3.2-1B-Instruct", {
