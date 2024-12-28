@@ -73,7 +73,6 @@ function App(): JSX.Element {
       </button>
       <button
         onClick={() =>
-          // window.api.chat("空はなぜ青いのですか？").then((r) => setMessage(r))
           ollama
             .pull({
               model: "llama3.2:1b",
@@ -89,6 +88,25 @@ function App(): JSX.Element {
         }
       >
         Ollama Pull
+      </button>
+      {/* huggingface.co/{ユーザー名}/{リポジトリ名} */}
+      <button
+        onClick={() =>
+          ollama
+            .pull({
+              model: "huggingface.co/MaziyarPanahi/gemma-2-2b-it-GGUF:IQ1_M",
+              stream: true,
+            })
+            .then(async (stream) => {
+              for await (const chunk of stream) {
+                setMessage(
+                  `${chunk.digest} ${chunk.completed}/${chunk.total} ${chunk.status}`,
+                );
+              }
+            })
+        }
+      >
+        Ollama Huggingface Pull
       </button>
       <button
         onClick={() => {
@@ -109,6 +127,26 @@ function App(): JSX.Element {
         }}
       >
         Ollama Chat
+      </button>
+      <button
+        onClick={() => {
+          setMessage("");
+          ollama
+            .chat({
+              model: "huggingface.co/MaziyarPanahi/gemma-2-2b-it-GGUF:IQ1_M",
+              messages: [{ role: "user", content: "Why is the sky blue?" }],
+              stream: true,
+            })
+            .then(async (stream) => {
+              for await (const chunk of stream) {
+                setMessage((message) => {
+                  return (message += chunk.message.content);
+                });
+              }
+            });
+        }}
+      >
+        Ollama Huggingface Chat
       </button>
       Current value: <strong>{counter}</strong>
       <Versions></Versions>
