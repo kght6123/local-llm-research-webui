@@ -3,6 +3,7 @@ import * as path from "path";
 import { spawn } from "child_process";
 import * as https from "https";
 import * as os from "os";
+import { OperationProgressHandler } from "../../types";
 
 /**
  * GitHub API (最新リリース取得) のエンドポイント
@@ -29,7 +30,9 @@ const exeFilePath = path.join(downloadDir, WINDOWS_EXE_NAME);
  * 1. GitHub API から最新リリースの JSON を取得し、
  *    アセット一覧から 'OllamaSetup.exe' のダウンロードURLを返す関数
  */
-async function getLatestWindowsExeUrl(): Promise<string> {
+async function getLatestWindowsExeUrl(
+  callback: OperationProgressHandler,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     https
       .get(
@@ -73,6 +76,12 @@ async function getLatestWindowsExeUrl(): Promise<string> {
 
               // ダウンロードURL (browser_download_url) を返す
               const downloadUrl: string = winAsset.browser_download_url;
+              callback({
+                status: "findLatest",
+                completed: -1,
+                total: -1,
+                value: downloadUrl,
+              });
               resolve(downloadUrl);
             } catch (err) {
               reject(err);
@@ -89,7 +98,11 @@ async function getLatestWindowsExeUrl(): Promise<string> {
 /**
  * 2. ダウンロード (302リダイレクト対応)
  */
-function downloadFile(url: string, dest: string): Promise<void> {
+function downloadFile(
+  url: string,
+  dest: string,
+  callback: OperationProgressHandler,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     // ダウンロード先フォルダを作成 (なければ)
     if (!fs.existsSync(downloadDir)) {
@@ -108,7 +121,9 @@ function downloadFile(url: string, dest: string): Promise<void> {
           console.log(`リダイレクト (${statusCode}): ${redirectUrl}`);
           file.close();
           fs.unlinkSync(dest);
-          return downloadFile(redirectUrl, dest).then(resolve).catch(reject);
+          return downloadFile(redirectUrl, dest, callback)
+            .then(resolve)
+            .catch(reject);
         }
 
         // 200番台以外はエラー扱い
@@ -132,6 +147,12 @@ function downloadFile(url: string, dest: string): Promise<void> {
           console.log(
             `ダウンロード中: ${(currentLength / size) * 100}% ${chunk.length} bytes`,
           );
+          callback({
+            status: "download",
+            completed: currentLength,
+            total: size,
+            value: url,
+          });
         });
         file.on("finish", () => {
           file.close(() => {
@@ -151,7 +172,10 @@ function downloadFile(url: string, dest: string): Promise<void> {
  * 3. EXEファイルを起動 (インストーラを開始)
  *    "cmd /c start <exePath>" で別ウィンドウで実行
  */
-function runExe(exePath: string): Promise<void> {
+function runExe(
+  exePath: string,
+  callback: OperationProgressHandler,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     console.log(`起動コマンド: start ${exePath}`);
     // start コマンドはすぐに戻るため、セットアップ完了を待ちたい場合は別途工夫が必要。
@@ -172,26 +196,45 @@ function runExe(exePath: string): Promise<void> {
       }
       resolve();
     });
+
+    callback({
+      status: "open",
+      completed: -1,
+      total: -1,
+      value: exePath,
+    });
   });
 }
 
-export default async function main(): Promise<void> {
+export default async function main({
+  callback,
+}: {
+  callback: OperationProgressHandler;
+}): Promise<void> {
   try {
     // 1. 最新リリース情報から Windows 用 EXE のダウンロードURLを取得
     console.log("最新の Windows 用 EXE を取得しています...");
-    const latestExeUrl = await getLatestWindowsExeUrl();
+    const latestExeUrl = await getLatestWindowsExeUrl(callback);
     console.log(`ダウンロードURL: ${latestExeUrl}`);
 
     // 2. ダウンロード (302リダイレクトにも対応)
     console.log("ダウンロードを開始します...");
-    await downloadFile(latestExeUrl, exeFilePath);
+    await downloadFile(latestExeUrl, exeFilePath, callback);
 
     // 3. ダウンロードした EXE (セットアップファイル) を起動
     console.log("EXE を起動します (セットアップ開始)...");
-    await runExe(exeFilePath);
+    await runExe(exeFilePath, callback);
 
     console.log("Ollama のセットアップを開始しました。");
     console.log("インストーラ画面に従ってセットアップを完了してください。");
+
+    // 5. 完了
+    callback({
+      status: "done",
+      completed: -1,
+      total: -1,
+      value: "ollama.exe",
+    });
   } catch (err) {
     console.error("エラーが発生しました:", err);
   }

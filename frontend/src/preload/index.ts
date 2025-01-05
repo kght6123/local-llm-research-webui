@@ -1,5 +1,6 @@
 import { contextBridge, ipcRenderer } from "electron";
 import { electronAPI } from "@electron-toolkit/preload";
+import { OperationProgress } from "../types";
 
 // Custom APIs for renderer
 const api = {
@@ -24,6 +25,12 @@ const api = {
     ),
   counterValue: (value: number): void =>
     ipcRenderer.send("counter-value", value),
+  onUpdateProgress: (
+    callback: (value: OperationProgress) => void,
+  ): Electron.IpcRenderer =>
+    ipcRenderer.on("update-progress", (_event, value: OperationProgress) =>
+      callback(value),
+    ),
 };
 
 // Use `contextBridge` APIs to expose Electron APIs to

@@ -1,4 +1,5 @@
 import { ElectronAPI } from "@electron-toolkit/preload";
+import { OperationProgress } from "../types";
 
 declare global {
   interface Window {
@@ -10,6 +11,7 @@ declare global {
       onUpdateCounter: (callback: (value: number) => void) => void;
       onUpdateMessage: (callback: (value: string) => void) => void;
       counterValue: (value: number) => void;
+      onUpdateProgress: (callback: (value: OperationProgress) => void) => void;
       install: () => Promise<string>;
       chat: (text: string) => Promise<string>;
     };

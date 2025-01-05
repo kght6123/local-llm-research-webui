@@ -4,6 +4,7 @@ import electronLogo from "./assets/electron.svg";
 import ollama from "ollama/browser";
 
 import "./App.css";
+import { OperationProgress } from "src/types";
 
 function App(): JSX.Element {
   const [message, setMessage] = useState<string>("");
@@ -48,10 +49,26 @@ function App(): JSX.Element {
       removeListener();
     };
   }, []);
+
+  const [progress, setProgress] = useState<OperationProgress>();
+  useEffect(() => {
+    window.api.onUpdateProgress((value) => {
+      setProgress(value);
+    });
+  }, []);
+
   return (
     <>
       <img alt="logo" className="logo" src={electronLogo} />
-      {message && <h1>{message}</h1>}
+      {message && <p className="font-black text-xl">{message}</p>}
+      {progress && (
+        <p>
+          {progress.status}...
+          {progress.status === "download" || progress.status === "pull"
+            ? `${Math.round((progress.completed || 0 / progress.total || 0) * 100)}%`
+            : progress.value}
+        </p>
+      )}
       <button
         onClick={() =>
           window.api
@@ -80,10 +97,24 @@ function App(): JSX.Element {
             })
             .then(async (stream) => {
               for await (const chunk of stream) {
-                setMessage(
-                  `${chunk.digest}/${chunk.total} ${chunk.status} completed=${chunk.completed}`,
-                );
+                // setMessage(
+                //   `${chunk.digest}/${chunk.total} ${chunk.status} completed=${chunk.completed}`,
+                // );
+                setProgress({
+                  completed: chunk.completed,
+                  total: chunk.total,
+                  status: "pull",
+                  value: chunk.digest,
+                });
               }
+            })
+            .finally(() => {
+              setProgress({
+                completed: 0,
+                total: 0,
+                status: "done",
+                value: "",
+              });
             })
         }
       >
@@ -99,10 +130,24 @@ function App(): JSX.Element {
             })
             .then(async (stream) => {
               for await (const chunk of stream) {
-                setMessage(
-                  `${chunk.digest} ${chunk.completed}/${chunk.total} ${chunk.status}`,
-                );
+                // setMessage(
+                //   `${chunk.digest} ${chunk.completed}/${chunk.total} ${chunk.status}`,
+                // );
+                setProgress({
+                  completed: chunk.completed,
+                  total: chunk.total,
+                  status: "pull",
+                  value: chunk.digest,
+                });
               }
+            })
+            .finally(() => {
+              setProgress({
+                completed: 0,
+                total: 0,
+                status: "done",
+                value: "",
+              });
             })
         }
       >

@@ -3,6 +3,7 @@ import * as path from "path";
 import { spawn } from "child_process";
 import * as https from "https";
 import * as os from "os";
+import { OperationProgressHandler } from "../../types";
 
 /** GitHub API: 最新リリース情報のエンドポイント */
 const LATEST_RELEASE_URL =
@@ -18,7 +19,9 @@ const appPath = path.join(downloadDir, "Ollama.app");
  * (1) GitHub API から最新リリースの JSON を取得し、
  *     'Ollama-darwin.zip' のダウンロードURLを返す
  */
-async function getLatestDarwinZipUrl(): Promise<string> {
+async function getLatestDarwinZipUrl(
+  callback: OperationProgressHandler,
+): Promise<string> {
   return new Promise((resolve, reject) => {
     https
       .get(
@@ -59,6 +62,12 @@ async function getLatestDarwinZipUrl(): Promise<string> {
               }
               // browser_download_url を取得
               const downloadUrl = darwinAsset.browser_download_url;
+              callback({
+                status: "findLatest",
+                completed: -1,
+                total: -1,
+                value: downloadUrl,
+              });
               resolve(downloadUrl);
             } catch (err) {
               reject(err);
@@ -75,7 +84,11 @@ async function getLatestDarwinZipUrl(): Promise<string> {
 /**
  * (2) リダイレクトに手動対応しながらファイルをダウンロード
  */
-function downloadFile(url: string, dest: string): Promise<void> {
+function downloadFile(
+  url: string,
+  dest: string,
+  callback: OperationProgressHandler,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     if (!fs.existsSync(downloadDir)) {
       fs.mkdirSync(downloadDir, { recursive: true });
@@ -93,7 +106,9 @@ function downloadFile(url: string, dest: string): Promise<void> {
           console.log(`リダイレクト (${statusCode}): ${redirectUrl}`);
           file.close();
           fs.unlinkSync(dest);
-          return downloadFile(redirectUrl, dest).then(resolve).catch(reject);
+          return downloadFile(redirectUrl, dest, callback)
+            .then(resolve)
+            .catch(reject);
         }
 
         // 200番台以外はエラー
@@ -117,6 +132,12 @@ function downloadFile(url: string, dest: string): Promise<void> {
           console.log(
             `ダウンロード中: ${(currentLength / size) * 100}% ${chunk.length} bytes`,
           );
+          callback({
+            status: "download",
+            completed: currentLength,
+            total: size,
+            value: url,
+          });
         });
         file.on("finish", () => {
           file.close(() => {
@@ -135,7 +156,10 @@ function downloadFile(url: string, dest: string): Promise<void> {
 /**
  * (3) macOS の 'open' コマンドを呼び出す
  */
-function openFile(filePath: string): Promise<void> {
+function openFile(
+  filePath: string,
+  callback: OperationProgressHandler,
+): Promise<void> {
   return new Promise((resolve, reject) => {
     console.log(`open ${filePath} を実行します...`);
     const child = spawn("open", [filePath], { stdio: "ignore" });
@@ -150,21 +174,32 @@ function openFile(filePath: string): Promise<void> {
       }
       resolve();
     });
+
+    callback({
+      status: "open",
+      completed: -1,
+      total: -1,
+      value: filePath,
+    });
   });
 }
 
-export default async function main(): Promise<void> {
+export default async function main({
+  callback,
+}: {
+  callback: OperationProgressHandler;
+}): Promise<void> {
   try {
     // 1. GitHub API から最新リリースの 'Ollama-darwin.zip' ダウンロードURLを取得
     console.log("最新の darwin 用 ZIP を取得しています...");
-    const latestZipUrl = await getLatestDarwinZipUrl();
+    const latestZipUrl = await getLatestDarwinZipUrl(callback);
     console.log(`ダウンロードURL: ${latestZipUrl}`);
 
     // 2. ZIPファイルをダウンロード (302対応)
-    await downloadFile(latestZipUrl, zipFilePath);
+    await downloadFile(latestZipUrl, zipFilePath, callback);
 
     // 3. ZIPファイルを open で解凍 (Archive Utility を呼び出す)
-    await openFile(zipFilePath);
+    await openFile(zipFilePath, callback);
 
     // 3-1. 解凍完了を簡易的に待機 (.app が生成されるまでループ)
     console.log("解凍完了を待機中...");
@@ -183,9 +218,23 @@ export default async function main(): Promise<void> {
     await new Promise((r) => setTimeout(r, 1000));
 
     // 4. Ollama.app を起動
-    await openFile(appPath);
+    await openFile(appPath, callback);
     console.log("Ollama.app を起動しました。");
+
+    // 5. 完了
+    callback({
+      status: "done",
+      completed: -1,
+      total: -1,
+      value: "Ollama.app",
+    });
   } catch (err) {
     console.error("エラーが発生しました:", err);
+    callback({
+      status: "systemerror",
+      completed: -1,
+      total: -1,
+      value: (err as Error).message,
+    });
   }
 }

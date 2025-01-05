@@ -6,6 +6,7 @@ import icon from "../../resources/icon.png?asset";
 import installWindows from "./install/install-windows";
 import installDarwin from "./install/install-darwin";
 import ollama, { Ollama } from "ollama";
+import { OperationProgress } from "../types";
 
 async function createWindow(): Promise<void> {
   // Create the browser window.
@@ -166,8 +167,22 @@ app.whenReady().then(() => {
       process.platform === "win32" ? "Running on Windows" : "Running on macOS",
       process.platform,
     );
-    if (process.platform === "win32") await installWindows();
-    else await installDarwin();
+    if (process.platform === "win32")
+      await installWindows({
+        callback: (progress: OperationProgress) => {
+          BrowserWindow.getAllWindows().forEach((window) =>
+            window.webContents.send("update-progress", progress),
+          );
+        },
+      });
+    else
+      await installDarwin({
+        callback: (progress: OperationProgress) => {
+          BrowserWindow.getAllWindows().forEach((window) =>
+            window.webContents.send("update-progress", progress),
+          );
+        },
+      });
     return "インストールが起動しました。画面の指示に従ってください。";
   });
 
