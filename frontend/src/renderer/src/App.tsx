@@ -1,9 +1,7 @@
 import { useEffect, useState } from "react";
 import Versions from "./components/Versions";
-import electronLogo from "./assets/electron.svg";
 import ollama from "ollama/browser";
 
-import "./App.css";
 import { OperationProgress } from "src/types";
 
 function App(): JSX.Element {
@@ -17,13 +15,12 @@ function App(): JSX.Element {
 
   return (
     <>
-      <img alt="logo" className="logo" src={electronLogo} />
       {message && <p className="font-black text-xl">{message}</p>}
       {progress && (
         <p>
           {progress.status}...
           {progress.status === "download" || progress.status === "pull"
-            ? `${Math.round((progress.completed || 0 / progress.total || 0) * 100)}%`
+            ? `${Math.round(((progress.completed || 0) / (progress.total || 0)) * 100)}%`
             : progress.value}
         </p>
       )}
