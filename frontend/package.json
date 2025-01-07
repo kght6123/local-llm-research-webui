@@ -1,10 +1,10 @@
 {
   "name": "local-llm-research-webui",
   "version": "1.0.0",
-  "description": "An Electron application with React and TypeScript",
+  "description": "Local LLM Research Application",
   "main": "./out/main/index.js",
-  "author": "example.com",
-  "homepage": "https://electron-vite.org",
+  "author": "kght6123",
+  "homepage": "https://www.kght6123.page",
   "scripts": {
     "format": "prettier --write .",
     "lint": "eslint . --ext .js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix",
@@ -24,7 +24,6 @@
   "dependencies": {
     "@electron-toolkit/preload": "^3.0.1",
     "@electron-toolkit/utils": "^3.0.0",
-    "@huggingface/transformers": "^3.1.0",
     "electron-updater": "^6.1.7",
     "ollama": "^0.5.11",
     "react-aria": "^3.36.0",
