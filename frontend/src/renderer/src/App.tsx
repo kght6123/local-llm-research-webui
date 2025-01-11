@@ -14,8 +14,6 @@ function App(): JSX.Element {
     });
   }, []);
   const [isPressed, setPressed] = useState<boolean>(false);
-  const [isPressed1, setPressed1] = useState<boolean>(false);
-  const [isPressed2, setPressed2] = useState<boolean>(false);
   return (
     <>
       {/* サイドバー https://x.com/kght6123/status/1600129834050416640 */}
@@ -33,48 +31,10 @@ function App(): JSX.Element {
           id="sidebar"
           className="peer/sidebar"
           checked={isPressed}
-          // onChange={(e) => {console.log(e.target.checked);setPressed(e.target.checked)}}
+          onChange={(e) => setPressed(e.target.checked)}
         />
-        <div className="h-screen bg-gray-800 transition-all peer-checked/sidebar:w-[var(--sidebar-size)] peer-[:not(:checked)]/sidebar:w-0 sm:peer-checked/sidebar:w-0 sm:peer-[:not(:checked)]/sidebar:w-[var(--sidebar-size)]">
-          <ToggleLabel
-            className="flex p-4 text-white"
-            htmlFor="sidebar"
-            isPressed={isPressed1}
-            onPressChange={(isPressed1) => {
-              console.log("isPressed1", isPressed1, isPressed2);
-              // setPressed(isPressed1 === isPressed2);
-              // setPressed1(isPressed1);
-            }}
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="h-6 w-6"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5"
-              />
-            </svg>
-            <span className="pl-4">メニューの開閉</span>
-          </ToggleLabel>
-          <div className="p-2 text-white">PC/Tablet向け</div>
-        </div>
-        <div className="h-screen bg-gray-900 transition-all peer-checked/sidebar:w-0 peer-[:not(:checked)]/sidebar:w-[var(--sidebar-mini-size)] sm:peer-checked/sidebar:w-[var(--sidebar-mini-size)] sm:peer-[:not(:checked)]/sidebar:w-0">
-          <ToggleLabel
-            className="flex p-4 text-white"
-            htmlFor="sidebar"
-            isPressed={isPressed2}
-            onPressChange={(isPressed2) => {
-              console.log("isPressed2", isPressed2, isPressed1);
-              // setPressed(isPressed2 === isPressed1);
-              // setPressed2(isPressed2);
-            }}
-          >
+        <div className="h-screen bg-gray-900 transition-all peer-checked/sidebar:w-[var(--sidebar-size)] peer-[:not(:checked)]/sidebar:w-[var(--sidebar-mini-size)] sm:peer-checked/sidebar:w-[var(--sidebar-mini-size)] sm:peer-[:not(:checked)]/sidebar:w-[var(--sidebar-size)]">
+          <ToggleLabel className="flex p-4 text-white" htmlFor="sidebar">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               fill="none"
@@ -90,7 +50,7 @@ function App(): JSX.Element {
               />
             </svg>
           </ToggleLabel>
-          <div className="p-1 text-white">Mobile向け</div>
+          <div className="p-1 text-white">メニュー</div>
         </div>
         <div className="h-screen bg-white p-4 transition-all peer-checked/sidebar:w-[calc(100vw-var(--sidebar-size))] peer-[:not(:checked)]/sidebar:w-[calc(100vw-var(--sidebar-mini-size))] sm:peer-checked/sidebar:w-[calc(100vw-var(--sidebar-mini-size))] sm:peer-[:not(:checked)]/sidebar:w-[calc(100vw-var(--sidebar-size))]">
           {/* 本体コンテンツ */}
