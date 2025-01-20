@@ -1,6 +1,13 @@
 import { useEffect, useState } from "react";
 import Versions from "./components/Versions";
 import ollama from "ollama/browser";
+import {
+  Button,
+  Disclosure,
+  DisclosureGroup,
+  DisclosurePanel,
+  Heading,
+} from "react-aria-components";
 
 import { OperationProgress } from "src/types";
 import { ToggleLabel } from "./components/atoms/ToggleLabel";
@@ -29,28 +36,83 @@ function App(): JSX.Element {
         <input
           type="checkbox"
           id="sidebar"
-          className="peer/sidebar"
+          className="peer/sidebar hidden"
           checked={isPressed}
           onChange={(e) => setPressed(e.target.checked)}
         />
-        <div className="h-screen bg-gray-900 transition-all peer-checked/sidebar:w-[var(--sidebar-size)] peer-[:not(:checked)]/sidebar:w-[var(--sidebar-mini-size)] sm:peer-checked/sidebar:w-[var(--sidebar-mini-size)] sm:peer-[:not(:checked)]/sidebar:w-[var(--sidebar-size)]">
-          <ToggleLabel className="flex p-4 text-white" htmlFor="sidebar">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              fill="none"
-              viewBox="0 0 24 24"
-              strokeWidth="1.5"
-              stroke="currentColor"
-              className="h-6 w-6"
+        <div className="h-screen bg-gray-900 transition-all peer-checked/sidebar:w-[var(--sidebar-size)] peer-[:not(:checked)]/sidebar:w-[var(--sidebar-mini-size)] sm:peer-checked/sidebar:w-[var(--sidebar-mini-size)] sm:peer-[:not(:checked)]/sidebar:w-[var(--sidebar-size)] @container/sidebar relative">
+          <div className="absolute top-[calc(50%-2rem)] -right-10 z-10">
+            <ToggleLabel
+              className="flex justify-center items-center content-center text-white h-14 w-14 aria-[pressed=false]:rotate-180 transition-transform"
+              htmlFor="sidebar"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M3.75 5.25h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5m-16.5 4.5h16.5"
-              />
-            </svg>
-          </ToggleLabel>
-          <div className="p-1 text-white">メニュー</div>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="size-4 stroke-gray-700 stroke-2 fill-none"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5 8.25 12l7.5-7.5"
+                />
+              </svg>
+            </ToggleLabel>
+          </div>
+          <div className="px-2 py-4 text-white flex flex-col gap-4">
+            <Button
+              onPress={() => alert("Hello world!")}
+              className="flex items-center py-4 px-2 text-black bg-gray-100 h-14 w-full justify-center gap-4 rounded-lg font-bold relative"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="size-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M2.25 12.76c0 1.6 1.123 2.994 2.707 3.227 1.068.157 2.148.279 3.238.364.466.037.893.281 1.153.671L12 21l2.652-3.978c.26-.39.687-.634 1.153-.67 1.09-.086 2.17-.208 3.238-.365 1.584-.233 2.707-1.626 2.707-3.228V6.741c0-1.602-1.123-2.995-2.707-3.228A48.394 48.394 0 0 0 12 3c-2.392 0-4.744.175-7.043.513C3.373 3.746 2.25 5.14 2.25 6.741v6.018Z"
+                />
+              </svg>
+              <span className="@[280px]/sidebar:inline hidden">
+                New&nbsp;Chat
+              </span>
+            </Button>
+            <DisclosureGroup>
+              <Disclosure id="personal">
+                <Heading>
+                  <Button
+                    slot="trigger"
+                    className="group/item py-4 px-2 text-left block overflow-hidden hover:overflow-visible hover:w-auto w-full @[280px]/sidebar:hover:w-full"
+                  >
+                    <div className="text-clip bg-gray-900 whitespace-nowrap overflow-hidden group-hover/item:overflow-visible py-4 pl-2 pr-4 relative rounded">
+                      Chat Room1
+                      <Button className="absolute -right-12 rounded @[280px]/sidebar:right-0 group-hover/item:block hidden bg-gray-900 py-4 px-2 top-0">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          viewBox="0 0 24 24"
+                          className="size-6 stroke-current stroke-2 fill-none"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M6.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM12.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0ZM18.75 12a.75.75 0 1 1-1.5 0 .75.75 0 0 1 1.5 0Z"
+                          />
+                        </svg>
+                      </Button>
+                    </div>
+                  </Button>
+                </Heading>
+                <DisclosurePanel>
+                  <p>Details about personal information here.</p>
+                </DisclosurePanel>
+              </Disclosure>
+            </DisclosureGroup>
+          </div>
         </div>
         <div className="h-screen bg-white p-4 transition-all peer-checked/sidebar:w-[calc(100vw-var(--sidebar-size))] peer-[:not(:checked)]/sidebar:w-[calc(100vw-var(--sidebar-mini-size))] sm:peer-checked/sidebar:w-[calc(100vw-var(--sidebar-mini-size))] sm:peer-[:not(:checked)]/sidebar:w-[calc(100vw-var(--sidebar-size))]">
           {/* 本体コンテンツ */}
