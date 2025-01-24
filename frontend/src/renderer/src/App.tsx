@@ -7,49 +7,51 @@ import {
   DisclosureGroup,
   DisclosurePanel,
   Heading,
+  ToggleButton,
 } from "react-aria-components";
 
 import { OperationProgress } from "src/types";
-import { ToggleLabel } from "./components/atoms/ToggleLabel";
+import clsx from "clsx";
 
 function App(): JSX.Element {
   const [message, setMessage] = useState<string>("");
   const [progress, setProgress] = useState<OperationProgress>();
+  const [toggleLeftSidebar, setToggleLeftSidebar] = useState<boolean>(true);
+  const [toggleRightSidebar, setToggleRightSidebar] = useState<boolean>(true);
   useEffect(() => {
     window.api.onUpdateProgress((value) => {
       setProgress(value);
     });
   }, []);
-  const [isPressed, setPressed] = useState<boolean>(false);
   return (
     <>
       {/* サイドバー https://x.com/kght6123/status/1600129834050416640 */}
       <div
-        className="flex h-screen w-screen bg-gray-900"
+        className="flex h-screen w-screen bg-gray-800"
         style={
           {
             "--sidebar-size": "280px",
-            "--sidebar-mini-size": "4rem",
+            "--sidebar-mini-size": "64px",
           } as React.CSSProperties
         }
       >
-        <input
-          type="checkbox"
-          id="sidebar"
-          className="peer/sidebar hidden"
-          checked={isPressed}
-          onChange={(e) => setPressed(e.target.checked)}
-        />
-        <div className="h-screen bg-gray-900 transition-all peer-checked/sidebar:w-[var(--sidebar-size)] peer-[:not(:checked)]/sidebar:w-[var(--sidebar-mini-size)] sm:peer-checked/sidebar:w-[var(--sidebar-mini-size)] sm:peer-[:not(:checked)]/sidebar:w-[var(--sidebar-size)] @container/sidebar relative">
+        <div
+          className={clsx(
+            "h-screen bg-gray-900 transition-all @container/sidebar relative",
+            toggleLeftSidebar && "w-[var(--sidebar-size)]",
+            !toggleLeftSidebar && "w-[var(--sidebar-mini-size)]",
+          )}
+        >
           <div className="absolute top-[calc(50%-2rem)] -right-10 z-10">
-            <ToggleLabel
-              className="flex justify-center items-center content-center text-white h-14 w-14 aria-[pressed=false]:rotate-180 transition-transform"
-              htmlFor="sidebar"
+            <ToggleButton
+              className="flex justify-center items-center content-center text-white h-14 w-14 [&>svg]:aria-[pressed=false]:rotate-180 transition-transform"
+              isSelected={toggleLeftSidebar}
+              onChange={setToggleLeftSidebar}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
                 viewBox="0 0 24 24"
-                className="size-4 stroke-gray-700 stroke-2 fill-none"
+                className="size-4 stroke-gray-700 stroke-[6] fill-none"
               >
                 <path
                   strokeLinecap="round"
@@ -57,7 +59,7 @@ function App(): JSX.Element {
                   d="M15.75 19.5 8.25 12l7.5-7.5"
                 />
               </svg>
-            </ToggleLabel>
+            </ToggleButton>
           </div>
           <div className="px-2 py-4 text-white flex flex-col gap-4">
             <Button
@@ -66,11 +68,8 @@ function App(): JSX.Element {
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
-                fill="none"
                 viewBox="0 0 24 24"
-                strokeWidth={1.5}
-                stroke="currentColor"
-                className="size-6"
+                className="size-5 stroke-current fill-none stroke-2"
               >
                 <path
                   strokeLinecap="round"
@@ -87,11 +86,11 @@ function App(): JSX.Element {
                 <Heading>
                   <Button
                     slot="trigger"
-                    className="group/item py-4 px-2 text-left block overflow-hidden hover:overflow-visible hover:w-auto w-full @[280px]/sidebar:hover:w-full"
+                    className="group/item py-2 px-1 text-left block overflow-hidden hover:overflow-visible hover:w-auto w-full @[280px]/sidebar:hover:w-full bg-gray-900 hover:bg-gray-800 rounded-lg"
                   >
-                    <div className="text-clip bg-gray-900 whitespace-nowrap overflow-hidden group-hover/item:overflow-visible py-4 pl-2 pr-4 relative rounded">
+                    <div className="text-clip whitespace-nowrap overflow-hidden group-hover/item:overflow-visible py-2 pl-2 pr-4 relative">
                       Chat Room1
-                      <Button className="absolute -right-12 rounded @[280px]/sidebar:right-0 group-hover/item:block hidden bg-gray-900 py-4 px-2 top-0">
+                      <Button className="absolute -right-10 rounded-e-lg @[280px]/sidebar:-right-1 group-hover/item:block hidden bg-gray-900 py-4 px-2 -top-2 hover:bg-gray-800">
                         <svg
                           xmlns="http://www.w3.org/2000/svg"
                           viewBox="0 0 24 24"
@@ -114,8 +113,8 @@ function App(): JSX.Element {
             </DisclosureGroup>
           </div>
         </div>
-        <div className="h-screen bg-white p-4 transition-all peer-checked/sidebar:w-[calc(100vw-var(--sidebar-size))] peer-[:not(:checked)]/sidebar:w-[calc(100vw-var(--sidebar-mini-size))] sm:peer-checked/sidebar:w-[calc(100vw-var(--sidebar-mini-size))] sm:peer-[:not(:checked)]/sidebar:w-[calc(100vw-var(--sidebar-size))]">
-          {/* 本体コンテンツ */}
+        <div className="h-screen bg-white p-4 transition-all grow">
+          {/* 本体コンテンツ、growで横幅を伸縮 */}
           {message && <p className="font-black text-xl">{message}</p>}
           {progress && (
             <p>
@@ -238,6 +237,33 @@ function App(): JSX.Element {
             Ollama Huggingface Chat
           </button>
           <Versions></Versions>
+        </div>
+        <div
+          className={clsx(
+            "h-screen bg-gray-900 transition-all @container/sidebar relative",
+            toggleRightSidebar && "w-[var(--sidebar-size)]",
+            !toggleRightSidebar && "w-[var(--sidebar-mini-size)]",
+          )}
+        >
+          <div className="absolute top-[calc(50%-2rem)] -left-10 z-10">
+            <ToggleButton
+              className="flex justify-center items-center content-center text-white h-14 w-14 [&>svg]:aria-[pressed=true]:rotate-180 transition-transform"
+              isSelected={toggleRightSidebar}
+              onChange={setToggleRightSidebar}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                className="size-4 stroke-gray-700 stroke-[6] fill-none"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M15.75 19.5 8.25 12l7.5-7.5"
+                />
+              </svg>
+            </ToggleButton>
+          </div>
         </div>
       </div>
     </>
