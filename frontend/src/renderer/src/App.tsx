@@ -12,6 +12,7 @@ import {
 
 import { OperationProgress } from "src/types";
 import clsx from "clsx";
+import Chat from "./components/Chat";
 
 function App(): JSX.Element {
   const [message, setMessage] = useState<string>("");
@@ -113,7 +114,7 @@ function App(): JSX.Element {
             </DisclosureGroup>
           </div>
         </div>
-        <div className="h-screen bg-white p-4 transition-all grow">
+        <div className="h-screen bg-white p-4 transition-all grow flex flex-col">
           {/* 本体コンテンツ、growで横幅を伸縮 */}
           {message && <p className="font-black text-xl">{message}</p>}
           {progress && (
@@ -125,11 +126,13 @@ function App(): JSX.Element {
             </p>
           )}
           <button
+            className="inline-block mt-4 mr-2 mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
             onClick={() => window.api.install().then((r) => setMessage(r))}
           >
             Install Ollama
           </button>
           <button
+            className="inline-block mt-4 mr-2 mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
             onClick={() =>
               ollama
                 .pull({
@@ -163,6 +166,7 @@ function App(): JSX.Element {
           </button>
           {/* huggingface.co/{ユーザー名}/{リポジトリ名} */}
           <button
+            className="inline-block mt-4 mr-2 mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
             onClick={() =>
               ollama
                 .pull({
@@ -196,6 +200,7 @@ function App(): JSX.Element {
             Ollama Huggingface Pull
           </button>
           <button
+            className="inline-block mt-4 mr-2 mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
             onClick={() => {
               setMessage("");
               ollama
@@ -216,6 +221,7 @@ function App(): JSX.Element {
             Ollama Chat
           </button>
           <button
+            className="inline-block mt-4 mr-2 mb-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold rounded-lg transition-colors"
             onClick={() => {
               setMessage("");
               ollama
@@ -236,7 +242,10 @@ function App(): JSX.Element {
           >
             Ollama Huggingface Chat
           </button>
-          <Versions></Versions>
+          <Versions />
+          <div className="flex-1 flex flex-col">
+            <Chat model="llama3.2:1b" placeholder="Type your message..." />
+          </div>
         </div>
         <div
           className={clsx(
